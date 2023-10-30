@@ -12,8 +12,8 @@ import 'package:web_socket_channel/io.dart';
 
 class LandRegisterModel extends ChangeNotifier {
   bool isLoading = true;
-  final String _rpcUrl = "http://192.168.43.130:8545";
-  final String _wsUrl = "ws://192.168.43.130:8545/";
+  final String _rpcUrl = "http://192.168.43.130:7545";
+  final String _wsUrl = "ws://192.168.43.130:7545/";
 
   String _privateKey =
       privateKey; //"b480f30c68bc885cd404d6328db62d5ca7fb4e2ad743c802cb2e6db5ac7530cf";
@@ -139,6 +139,16 @@ class LandRegisterModel extends ChangeNotifier {
     final val =
         await _client.call(contract: _contract, function: _userInfo, params: [
       EthereumAddress.fromHex(address),
+    ]);
+    print(val);
+    return val;
+  }
+
+  Future<List<dynamic>> myProfileInfo() async {
+    notifyListeners();
+    final val =
+        await _client.call(contract: _contract, function: _userInfo, params: [
+      _ownAddress,
     ]);
     print(val);
     return val;
