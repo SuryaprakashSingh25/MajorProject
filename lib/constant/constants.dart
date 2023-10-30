@@ -1,24 +1,60 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hovering/hovering.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 double width = 590;
 bool isDesktop = false;
 String privateKey = "";
+const String contractAddress = "0x2676c9b4aFf627680Be6Ff5cad19965ddE75d423";
+double ethToInr = 0;
+bool connectedWithMetamask =
+    false; //1->entered private key ; 2->connected with metamask
+
+launchUrl(String url) async {
+  if (await canLaunch(url)) {
+    await launch(
+      url,
+      forceSafariVC: false,
+      forceWebView: false,
+      headers: <String, String>{'my_header_key': 'my_header_value'},
+    );
+  } else {
+    throw 'Could not launch $url';
+  }
+}
+
+getEthToInr() async {
+  try {
+    String api =
+        "https://api.nomics.com/v1/currencies/ticker?key=b081894c50331900a2c0e667a3c24c66482ebc8c&ids=ETH&interval=1h&convert=INR";
+    var url = Uri.parse(api);
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+    double priceInr = double.parse(data[0]['price']);
+    ethToInr = double.parse(priceInr.toStringAsFixed(3));
+    print("ETH to INR " + priceInr.toStringAsFixed(3));
+  } catch (e) {
+    print(e);
+    ethToInr = 329172.649;
+  }
+}
 
 Widget CustomButton(text, fun) => Container(
-      constraints: BoxConstraints(maxWidth: 250.0, minHeight: 50.0),
-      margin: EdgeInsets.all(10),
+      constraints: const BoxConstraints(maxWidth: 250.0, minHeight: 50.0),
+      margin: const EdgeInsets.all(10),
       child: ElevatedButton(
         onPressed: fun,
-        //color: Theme.of(context).accentColor,
         child: Padding(
-          padding: EdgeInsets.all(0),
+          padding: const EdgeInsets.all(0),
           child: Container(
             alignment: Alignment.center,
             child: Text(
               text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 color: Colors.white,
               ),
@@ -28,20 +64,42 @@ Widget CustomButton(text, fun) => Container(
       ),
     );
 Widget CustomButton2(text, fun) => Container(
-      constraints: BoxConstraints(maxWidth: 150.0, minHeight: 40.0),
-      margin: EdgeInsets.all(10),
+      constraints: const BoxConstraints(maxWidth: 150.0, minHeight: 40.0),
+      margin: const EdgeInsets.all(10),
       child: ElevatedButton(
         onPressed: fun,
         //color: Theme.of(context).accentColor,
         child: Padding(
-          padding: EdgeInsets.all(0),
+          padding: const EdgeInsets.all(0),
           child: Container(
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+Widget CustomButton3(text, fun, color) => Container(
+      constraints: const BoxConstraints(maxWidth: 130.0, minHeight: 40.0),
+      margin: const EdgeInsets.all(10),
+      child: ElevatedButton(
+        onPressed: fun,
+        style: ElevatedButton.styleFrom(primary: color),
+        child: Padding(
+          padding: const EdgeInsets.all(0),
+          child: Container(
+            color: color,
             alignment: Alignment.center,
             child: Text(
               text,
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.white,
+                color: color == Colors.white ? Colors.black : Colors.white,
               ),
             ),
           ),
@@ -55,8 +113,9 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
           height: 270,
           width: 250,
           decoration: BoxDecoration(
+              color: Colors.white,
               border: Border.all(color: Colors.black54, width: 2),
-              borderRadius: BorderRadius.all(Radius.circular(13))),
+              borderRadius: const BorderRadius.all(Radius.circular(13))),
           child: Center(
               child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -65,7 +124,7 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'contract_owner_icon.jpg',
+                    'assets/contract_owner_icon.jpg',
                     width: 110.0,
                     height: 110.0,
                     fit: BoxFit.fill,
@@ -75,7 +134,7 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'land_ins_icon.jpg',
+                    'assets/land_ins_icon.jpg',
                     width: 110.0,
                     height: 110.0,
                     fit: BoxFit.fill,
@@ -84,14 +143,17 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
               if (text == 'User')
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Icon(
-                    Icons.person,
-                    size: 85,
+                  child: Image.asset(
+                    'assets/user_icon.png',
+                    width: 110.0,
+                    height: 110.0,
+                    fit: BoxFit.fill,
                   ),
                 ),
               Text(
                 text,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
               CustomButton2('Continue', fun)
             ],
@@ -102,8 +164,9 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
           height: 270,
           width: 250,
           decoration: BoxDecoration(
+              color: Colors.white,
               border: Border.all(color: Colors.blue, width: 2),
-              borderRadius: BorderRadius.all(Radius.circular(20))),
+              borderRadius: const BorderRadius.all(Radius.circular(20))),
           child: Center(
               child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -112,7 +175,7 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'contract_owner_icon.jpg',
+                    'assets/contract_owner_icon.jpg',
                     width: 110.0,
                     height: 110.0,
                     fit: BoxFit.fill,
@@ -122,7 +185,7 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'land_ins_icon.jpg',
+                    'assets/land_ins_icon.jpg',
                     width: 110.0,
                     height: 110.0,
                     fit: BoxFit.fill,
@@ -131,14 +194,17 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
               if (text == 'User')
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Icon(
-                    Icons.person,
-                    size: 90,
+                  child: Image.asset(
+                    'assets/user_icon.png',
+                    width: 110.0,
+                    height: 110.0,
+                    fit: BoxFit.fill,
                   ),
                 ),
               Text(
                 text,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
               CustomButton2('Continue', fun)
             ],
@@ -148,19 +214,19 @@ Widget CustomAnimatedContainer(text, fun) => Padding(
     );
 
 Widget CustomTextFiled(text, label) => Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: TextFormField(
         readOnly: true,
         initialValue: text,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 15,
         ),
         decoration: InputDecoration(
             isDense: true, // Added this
-            contentPadding: EdgeInsets.all(12),
-            border: OutlineInputBorder(),
+            contentPadding: const EdgeInsets.all(12),
+            border: const OutlineInputBorder(),
             labelText: label,
-            labelStyle: TextStyle(fontSize: 20),
+            labelStyle: const TextStyle(fontSize: 20),
             fillColor: Colors.grey,
             filled: true),
       ),
@@ -172,3 +238,34 @@ class Menu {
 
   Menu({required this.title, required this.icon});
 }
+
+void confirmDialog(
+  context,
+  func,
+) =>
+    showCupertinoDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return CupertinoAlertDialog(
+            title: const Text('Please Confirm'),
+            content: const Text('Are you sure to make it on sell?'),
+            actions: [
+              // The "Yes" button
+              CupertinoDialogAction(
+                onPressed: func,
+                child: const Text('Yes'),
+                isDefaultAction: true,
+                isDestructiveAction: true,
+              ),
+              // The "No" button
+              CupertinoDialogAction(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('No'),
+                isDefaultAction: false,
+                isDestructiveAction: false,
+              )
+            ],
+          );
+        });

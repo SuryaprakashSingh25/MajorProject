@@ -35,11 +35,16 @@ dependencies:
   provider: ^6.0.1
   flutter_styled_toast: ^2.0.0
   hovering: ^1.0.4
+  flutter_spinkit: ^5.1.0
+  flutter_smart_dialog: ^3.0.2
+  file_picker: ^4.2.4
+  url_launcher: ^6.0.10
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  flutter_web3: ^2.1.6
 
 dev_dependencies:
   flutter_test:
@@ -65,9 +70,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - build/contracts/Land.json
-     - assets/contract_owner_icon.jpg
-     - assets/land_ins_icon.jpg
+     - src/contracts/Land.json
+     - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

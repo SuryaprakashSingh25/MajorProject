@@ -1,8 +1,12 @@
-pragma solidity >= 0.5.2;
-//pragma solidity ^0.6.0;
+//pragma solidity >= 0.5.2;
+pragma solidity ^0.5.0;
 
 contract Land {
     address contractOwner;
+
+    constructor() public{
+        contractOwner = msg.sender;
+    }
 
     struct Landreg {
         uint id;
@@ -12,7 +16,6 @@ contract Land {
         uint landPrice;
         uint propertyPID;
         uint physicalSurveyNumber;
-        //string ipfsHash;
         string document;
         bool isforSell;
         address payable ownerAddress;
@@ -28,11 +31,10 @@ contract Land {
         string panNumber;
         string document;
         string email;
-       // uint[] mylands;
         bool isUserVerified;
     }
 
-     struct LandInspector {
+    struct LandInspector {
         uint id;
         address _addr;
         string name;
@@ -48,29 +50,29 @@ contract Land {
         uint landId;
         reqStatus requestStatus;
         bool isPaymentDone;
-        // bool requested;
     }
     enum reqStatus {requested,accepted,rejected,paymentdone,commpleted}
 
-    constructor() public{
-        contractOwner = msg.sender ;
-    }
+
     uint inspectorsCount;
-    uint userCount;
-    uint landsCount;
+    uint public userCount;
+    uint public landsCount;
     uint requestCount;
 
 
-    mapping(address => LandInspector) public InspectorMapping;
-    mapping(address => bool) public RegisteredInspectorMapping;
+    mapping(address => LandInspector)  InspectorMapping;
+    mapping(address => bool)  RegisteredInspectorMapping;
     mapping(address => User) public UserMapping;
-    mapping(uint => address) public AllUsers;
-    mapping(uint => address[]) public allUsersList;
-    mapping(address => bool) public RegisteredUserMapping;
-    mapping(address => uint[]) public MyLands;
+    mapping(uint => address)  AllUsers;
+    mapping(uint => address[])  allUsersList;
+    mapping(address => bool)  RegisteredUserMapping;
+    mapping(address => uint[])  MyLands;
     mapping(uint => Landreg) public lands;
     mapping(uint => LandRequest) public LandRequestMapping;
-    mapping(address => uint[]) public MyLandRequest;
+    mapping(address => uint[])  MyReceivedLandRequest;
+    mapping(address => uint[])  MySentLandRequest;
+    mapping(uint => uint[])  allLandList;
+    mapping(uint => uint[])  paymentDoneList;
 
 
     function isContractOwner(address _addr) public view returns(bool){
@@ -80,7 +82,7 @@ contract Land {
             return false;
     }
 
-     //-----------------------------------------------LandInspector-----------------------------------------------
+    //-----------------------------------------------LandInspector-----------------------------------------------
 
     function addLandInspector(address _addr,string memory _name, uint _age, string memory _designation,string memory _city) public returns(bool){
         if(contractOwner!=msg.sender)
@@ -90,7 +92,10 @@ contract Land {
         InspectorMapping[_addr] = LandInspector(inspectorsCount,_addr,_name, _age, _designation,_city);
         return true;
     }
-     function isLandInspector(address _id) public view returns (bool) {
+
+
+
+    function isLandInspector(address _id) public view returns (bool) {
         if(RegisteredInspectorMapping[_id]){
             return true;
         }else{
@@ -100,16 +105,16 @@ contract Land {
 
 
 
-   //-----------------------------------------------User-----------------------------------------------
+    //-----------------------------------------------User-----------------------------------------------
 
-   function isUserRegistered(address _addr) public view returns(bool)
-   {
-       if(RegisteredUserMapping[_addr]){
+    function isUserRegistered(address _addr) public view returns(bool)
+    {
+        if(RegisteredUserMapping[_addr]){
             return true;
         }else{
             return false;
         }
-   }
+    }
 
     function registerUser(string memory _name, uint _age, string memory _city,string memory _aadharNumber, string memory _panNumber, string memory _document, string memory _email
     ) public {
@@ -129,7 +134,7 @@ contract Land {
         UserMapping[_userId].isUserVerified=true;
     }
     function isUserVerified(address id) public view returns(bool){
-       return UserMapping[id].isUserVerified;
+        return UserMapping[id].isUserVerified;
     }
     function ReturnAllUserList() public view returns(address[] memory)
     {
@@ -137,20 +142,27 @@ contract Land {
     }
 
 
-     //-----------------------------------------------Land-----------------------------------------------
+    //-----------------------------------------------Land-----------------------------------------------
     function addLand(uint _area, string memory _city,string memory _state, uint landPrice, uint _propertyPID,uint _surveyNum, string memory _document) public {
         require(isUserVerified(msg.sender));
         landsCount++;
         lands[landsCount] = Landreg(landsCount, _area, _city, _state, landPrice,_propertyPID, _surveyNum , _document,false,msg.sender,false);
         MyLands[msg.sender].push(landsCount);
+        allLandList[1].push(landsCount);
         // emit AddingLand(landsCount);
     }
+
+    function ReturnAllLandList() public view returns(uint[] memory)
+    {
+        return allLandList[1];
+    }
+
     function verifyLand(uint _id) public{
         require(isLandInspector(msg.sender));
         lands[_id].isLandVerified=true;
     }
     function isLandVerified(uint id) public view returns(bool){
-      return lands[id].isLandVerified;
+        return lands[id].isLandVerified;
     }
 
     function myAllLands(address id) public view returns( uint[] memory){
@@ -170,13 +182,18 @@ contract Land {
         require(isUserVerified(msg.sender) && isLandVerified(_landId));
         requestCount++;
         LandRequestMapping[requestCount]=LandRequest(requestCount,lands[_landId].ownerAddress,msg.sender,_landId,reqStatus.requested,false);
-        MyLandRequest[lands[_landId].ownerAddress].push(requestCount);
+        MyReceivedLandRequest[lands[_landId].ownerAddress].push(requestCount);
+        MySentLandRequest[msg.sender].push(requestCount);
     }
 
-   function myAllLandRequests() public view returns(uint[] memory)
-   {
-      return MyLandRequest[msg.sender];
-   }
+    function myReceivedLandRequests() public view returns(uint[] memory)
+    {
+        return MyReceivedLandRequest[msg.sender];
+    }
+    function mySentLandRequests() public view returns(uint[] memory)
+    {
+        return MySentLandRequest[msg.sender];
+    }
     function acceptRequest(uint _requestId) public
     {
         require(LandRequestMapping[_requestId].sellerId==msg.sender);
@@ -187,7 +204,6 @@ contract Land {
         require(LandRequestMapping[_requestId].sellerId==msg.sender);
         LandRequestMapping[_requestId].requestStatus=reqStatus.rejected;
     }
-
 
     function requesteStatus(uint id) public view returns(bool)
     {
@@ -207,7 +223,12 @@ contract Land {
         //lands[LandRequestMapping[_requestId].landId].ownerAddress.transfer(lands[LandRequestMapping[_requestId].landId].landPrice);
         lands[LandRequestMapping[_requestId].landId].ownerAddress.transfer(msg.value);
         LandRequestMapping[_requestId].isPaymentDone=true;
+        paymentDoneList[1].push(_requestId);
+    }
 
+    function returnPaymentDoneList() public view returns(uint[] memory)
+    {
+        return paymentDoneList[1];
     }
 
     function transferOwnership(uint _requestId) public returns(bool)
@@ -224,10 +245,12 @@ contract Land {
             if(MyLands[LandRequestMapping[_requestId].sellerId][i]==LandRequestMapping[_requestId].landId)
             {
                 MyLands[LandRequestMapping[_requestId].sellerId][i]=MyLands[LandRequestMapping[_requestId].sellerId][len-1];
-                MyLands[LandRequestMapping[_requestId].sellerId].length--;
+                //MyLands[LandRequestMapping[_requestId].sellerId].length--;
+                MyLands[LandRequestMapping[_requestId].sellerId].pop();
                 break;
             }
         }
+        lands[LandRequestMapping[_requestId].landId].isforSell=false;
         lands[LandRequestMapping[_requestId].landId].ownerAddress=LandRequestMapping[_requestId].buyerId;
         return true;
     }

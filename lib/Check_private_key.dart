@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:land_registration/LandInspectorDashboard.dart';
 import 'package:land_registration/UserDashboard.dart';
 import 'package:land_registration/addLandInspector.dart';
+import 'package:land_registration/constant/MetamaskProvider.dart';
 import 'package:land_registration/constant/constants.dart';
+import 'package:land_registration/constant/loadingScreen.dart';
 import 'package:land_registration/registerUser.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -28,6 +31,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
   @override
   Widget build(BuildContext context) {
     var model = Provider.of<LandRegisterModel>(context);
+    var model2 = Provider.of<MetaMaskProvider>(context);
     width = MediaQuery.of(context).size.width;
 
     if (width > 600) {
@@ -36,18 +40,24 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF272D34),
-        title: Text('Login'),
+        backgroundColor: const Color(0xFF272D34),
+        title: const Text('Login'),
       ),
       body: Container(
         //width: 500,
         alignment: Alignment.topCenter,
         child: Column(
           children: [
+            Image.asset(
+              'assets/authenticate.png',
+              height: 280,
+              width: 520,
+            ),
+            Text('You can enter private key'),
             Container(
               width: width,
               child: Padding(
-                padding: EdgeInsets.all(15),
+                padding: const EdgeInsets.all(15),
                 child: Form(
                   key: _formKey,
                   child: TextFormField(
@@ -71,7 +81,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                               _isObscure = !_isObscure;
                             });
                           }),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       labelText: 'Private Key',
                       hintText: 'Enter Your PrivateKey',
                     ),
@@ -81,7 +91,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
             ),
             Text(
               errorMessage,
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
             CustomButton(
                 'Continue',
@@ -111,7 +121,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            AddLandInspector()));
+                                            const AddLandInspector()));
                               }
                             } else if (widget.val == "RegisterUser") {
                               bool temp = await model.isUserregistered();
@@ -123,7 +133,8 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => RegisterUser()));
+                                        builder: (context) =>
+                                            const RegisterUser()));
                               }
                             } else if (widget.val == "LandInspector") {
                               bool temp =
@@ -138,7 +149,8 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => LandInspector()));
+                                        builder: (context) =>
+                                            const LandInspector()));
                               }
                             } else if (widget.val == "UserLogin") {
                               bool temp = await model.isUserregistered();
@@ -148,14 +160,16 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => RegisterUser()));
+                                        builder: (context) =>
+                                            const RegisterUser()));
                               } else {
                                 Navigator.pop(context);
                                 Navigator.pop(context);
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => UserDashBoard()));
+                                        builder: (context) =>
+                                            const UserDashBoard()));
                               }
                             }
                           } catch (e) {
@@ -168,7 +182,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                           });
                         }
                       }),
-            isLoading ? CircularProgressIndicator() : Container()
+            isLoading ? spinkitLoader : Container()
           ],
         ),
       ),
